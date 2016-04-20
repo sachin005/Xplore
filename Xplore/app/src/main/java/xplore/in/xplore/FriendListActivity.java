@@ -1,6 +1,7 @@
 package xplore.in.xplore;
 
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -41,8 +42,23 @@ public class FriendListActivity extends AppCompatActivity {
 //        }
 
         Intent intent = getIntent();
-        String[] friendsFromBundle = intent.getStringArrayExtra("friends_list");
-        List<String> friendsList = Arrays.asList(friendsFromBundle);
+//        String[] friendsFromBundle = intent.getStringArrayExtra("friends_list");
+//        Log.d(TAG, "friends from bundle array length: " + friendsFromBundle.length);
+
+        // Todo: find a better way to pass list to another activity
+        ArrayList<String> friendsList = (ArrayList<String>) intent.getSerializableExtra("fbdata"); // FriendList.getFriendList(); // Arrays.asList(friendsFromBundle);
+        Location location = intent.getParcelableExtra("location");
+//        String latNLong = intent.getStringExtra("latitude") + " " + intent.getStringExtra("longitude");
+//        if(latNLong.isEmpty()) {
+//            friendsList.add("latNLong is empty");
+//        }
+//        else
+//            friendsList.add(latNLong);
+
+        if(location != null)
+            friendsList.add(location.getLatitude() + "\nlong: " + location.getLongitude());
+        else
+            friendsList.add("location is null");
         Log.d(TAG, "friendList length: " + friendsList.size());
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, R.layout.friends_listview, friendsList);
         ListView listView = (ListView) findViewById(R.id.friendslistView);
