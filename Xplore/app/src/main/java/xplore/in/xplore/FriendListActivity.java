@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -45,7 +46,7 @@ public class FriendListActivity extends AppCompatActivity {
 //        String[] friendsFromBundle = intent.getStringArrayExtra("friends_list");
 //        Log.d(TAG, "friends from bundle array length: " + friendsFromBundle.length);
 
-        // Todo: find a better way to pass list to another activity
+        // Todo: find a better way to pass/ receive list to/ from another activity
         ArrayList<String> friendsList = (ArrayList<String>) intent.getSerializableExtra("fbdata"); // FriendList.getFriendList(); // Arrays.asList(friendsFromBundle);
         Location location = intent.getParcelableExtra("location");
 //        String latNLong = intent.getStringExtra("latitude") + " " + intent.getStringExtra("longitude");
@@ -63,10 +64,20 @@ public class FriendListActivity extends AppCompatActivity {
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, R.layout.friends_listview, friendsList);
         ListView listView = (ListView) findViewById(R.id.friendslistView);
 
-        if(listView != null)
+        if(listView != null) {
             listView.setAdapter(arrayAdapter);
 
-//        listView.setOnClickListener();
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                    Toast.makeText(getApplicationContext(), "clicked item " + position, Toast.LENGTH_LONG).show();
+                    if(position == 3) {
+                        Intent intent = new Intent(FriendListActivity.this, PrimeActivity.class);
+                        startActivity(intent);
+                    }
+                }
+            });
+        }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -77,6 +88,8 @@ public class FriendListActivity extends AppCompatActivity {
             }
         });
     }
+
+
 
     protected List<String> getFriendsList() {
 
