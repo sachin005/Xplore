@@ -1,8 +1,11 @@
 package xplore.in.xplore;
 
+import android.content.Intent;
+import android.location.Location;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ListFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -11,13 +14,22 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.ArrayAdapter;
 import android.widget.TextView;
+
+import com.facebook.AccessToken;
+import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+
+import org.json.JSONArray;
 
 public class PrimeActivity extends AppCompatActivity {
 
@@ -30,6 +42,8 @@ public class PrimeActivity extends AppCompatActivity {
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
+    private static Location mLocation;
+    private static final String TAG = "PrimeActivty";
 
     /**
      * The {@link ViewPager} that will host the section contents.
@@ -41,11 +55,17 @@ public class PrimeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_prime);
 
+//        FacebookSdk.sdkInitialize(getApplicationContext());
+
+        Intent intent = getIntent();
+        mLocation = intent.getParcelableExtra("location");
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
@@ -93,12 +113,13 @@ public class PrimeActivity extends AppCompatActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class PlaceholderFragment extends ListFragment {
         /**
          * The fragment argument representing the section number for this
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
+        private static final String TITLE = "fragment_title";
 
         public PlaceholderFragment() {
         }
@@ -110,6 +131,7 @@ public class PrimeActivity extends AppCompatActivity {
         public static PlaceholderFragment newInstance(int sectionNumber) {
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
+//            args.putString(TITLE, title);
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
             return fragment;
@@ -120,10 +142,38 @@ public class PrimeActivity extends AppCompatActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_prime, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
+//            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
+//            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
+            String[] places = PrimeActivity.getPlaces("facebook"); // {"one", "two"};
+            ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, places);
+            setListAdapter(listAdapter);
             return rootView;
         }
+    }
+
+    public static String[] getPlaces(String network) {
+        String[] result = {"place1", "place2"};
+
+        try {
+            GraphRequest.newPlacesSearchRequest(AccessToken.getCurrentAccessToken(), mLocation, 5000, 30, "beach",
+                    new GraphRequest.GraphJSONArrayCallback() {
+                        @Override
+                        public void onCompleted(JSONArray objects, GraphResponse response) {
+                            try {
+                                Log.d(TAG, objects.toString(3));
+                            }
+                            catch(Exception e) {
+                                Log.d(TAG, "error occurred in json object toString");
+                            }
+                        }
+                    }).executeAsync();
+        }
+        catch(Exception e) {
+            Log.d(TAG, "some error occured in places search request");
+            e.printStackTrace();
+        }
+
+        return result;
     }
 
     /**
@@ -153,11 +203,11 @@ public class PrimeActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "SECTION 1";
+                    return "Facebook";
                 case 1:
-                    return "SECTION 2";
+                    return "Instagram";
                 case 2:
-                    return "SECTION 3";
+                    return "Yelp";
             }
             return null;
         }

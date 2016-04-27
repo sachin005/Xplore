@@ -48,7 +48,7 @@ public class FriendListActivity extends AppCompatActivity {
 
         // Todo: find a better way to pass/ receive list to/ from another activity
         ArrayList<String> friendsList = (ArrayList<String>) intent.getSerializableExtra("fbdata"); // FriendList.getFriendList(); // Arrays.asList(friendsFromBundle);
-        Location location = intent.getParcelableExtra("location");
+        final Location location = intent.getParcelableExtra("location");
 //        String latNLong = intent.getStringExtra("latitude") + " " + intent.getStringExtra("longitude");
 //        if(latNLong.isEmpty()) {
 //            friendsList.add("latNLong is empty");
@@ -73,6 +73,7 @@ public class FriendListActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "clicked item " + position, Toast.LENGTH_LONG).show();
                     if(position == 3) {
                         Intent intent = new Intent(FriendListActivity.this, PrimeActivity.class);
+                        intent.putExtra("location", location);
                         startActivity(intent);
                     }
                 }
