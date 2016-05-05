@@ -1,0 +1,144 @@
+While setting up Facebook API, use the compile statement for dependencies from the quick start section. Using + is the version number can lead to unpredicted stuff suggestion given by android studio
+
+FB android getting started docs say: You can add multiple key hashes if you develop with multiple machines
+
+When making a GraphRequest, call executeAsync() from the UI thread for the callback to work.
+
+got this -- Warning: Request without access token missing application ID or client token
+code2care.org blog says add application id to manifest. I have done that.
+
+another -- An active access token must be used to query information about the current user
+
+Learn to read JSON response!
+--- 4/4/2016
+
+Warning for Default File Template
+Method invocation listView.setAdapter() may produce nullpointerexception -- add assertion for listView object to check if its null
+fab -- null pointer exception
+
+fb graph api explore:
+GraphRequest request = GraphRequest.newMeRequest(
+  accessToken,
+  new GraphRequest.GraphJSONObjectCallback() {
+    @Override
+    public void onCompleted(JSONObject object, GraphResponse response) {
+      // Insert your code here
+    }
+});
+
+Bundle parameters = new Bundle();
+parameters.putString("fields", "id,name");
+request.setParameters(parameters);
+request.executeAsync();
+
+
+didn't add callback for the loginButton. Did it for LoginManager instead.
+Error: Failed to find provider info for com.facebook.katana.provider.PlatformProvider
+and more like these. StackOverflow says update Facebook app.
+
+added onActivityResult method.
+
+JSONObject was returned to the GraphRequest not JSONArray
+errors: failed to find provider info for AttributionIdProvider and PlatformProvider
+Facebook app is updated, app id is right, internet permission is added
+
+Platform provider error solved. Most likely because Facebook app updated.
+
+Looks like I'm going to have to use GraphRequest.newMeRequest instead of making a new GraphRequest(). Making changes because newMeRequest returns a lot of data.
+These are the only two methods to get data using Graph api.
+
+Useful api references:
+Place - a place
+Place topic - category of a place page
+Place tag - place tag
+
+Using public feed API and keyword insights API for nearby events/ fun places.
+Find recent posts from Instagram and others if possible to let the user see what is going on there.
+
+// another idea - get discount coupons/ deals/ checkins when at a or near a place offering discounts
+
+executeAsync()
+Executes the request asynchronously. This function will return immediately, and the request will be processed on a separate thread. In order to process result of a request, or determine whether a request succeeded or failed, a callback must be specified (see the setCallback.setCallback(Callback) method).
+
+Using newPlacesSearchRequest on graph to search for places nearby
+
+Now you need to request permission from user every time you need to access sensitive data like location in this case.
+You should check permission availability and request it not available. Persmission can be checked from a service and requested from an activity only.
+
+A service is simply a component that can run in the background even when the user is not interacting with your application. Thus, you should create a service only if that is what you need.
+
+****
+In versions of Google Play services prior to 6.5, you had to compile the entire package of APIs into your app. In some cases, doing so made it more difficult to keep the number of methods in your app (including framework APIs, library methods, and your own code) under the 65,536 limit.
+
+From version 6.5, you can instead selectively compile Google Play service APIs into your app.
+****
+
+Implement connectionsCallback and onConnectionFailedListener.
+
+When a call is made to Facebook Graph API, it takes some time but the app doesn't wait and uses the available friendsList field which is unpopulated at that moment.
+Need to find a way to invoke it after result is returned.
+
+More changes in what to pass to FriendsListActivity. Passing friends list as ArrayList<String> and retrieving in FriendsListActivtiy using serializable. Serializable is applicable only if the type E is serializable and it also reduces performance***** still using it!
+
+Tabbed activity for displaying the important content.
+FragmentPagerAdapter: best when navigating between sibling screens representing a fixed small number of pages
+FragmentStatePagerAdapter: best for paging across collection of objects for which the number of pages is undetermined. It destroys fragments as the user navigates to other pages to minimize memory usage.
+
+21/4/2016
+Need to know what exactly is called at what time when a tabbed activity is called/displayed.
+Apparently, class extending FragmentPagerAdapter is called first and it uses methods from class extending Fragment to display content in the tabs.
+The latter class is responsible for creating a view that is displayed.
+
+getItem() in class extending FragmentPagerAdapter is responsible for conveying what is to be dispalyed in the tab.
+
+Get the number of check-ins in the last hour on Facebook, Instagram, Yelp and display posts in a listview.
+
+4-26-2016
+PrimeActivity has auto generated code consisting of an inner class that extends Fragment. Trying to use this class by making it extend ListFragment.
+
+When extending any PagerAdapter, FragmentPagerAdapter or FragmentStatePagerAdapter, we need to override few methods at minimun.
+while using FragmentPagerAdapter: getItem(int) and getCount()
+getItem(int) returns the fragment associated with a specified position.
+getCount() returns the number of views available.
+
+When is getItem(int) called?
+http://stackoverflow.com/questions/19339500/when-is-fragmentpageradapters-getitem-called
+Whenever adapter needs a fragment and the fragment does not exist. This method is called by FragmentPagerAdapter's instantiateItem(ViewGroup, int position) method.
+
+Change the number of tabs through the getCount() method. Simply return the number of tabs you want to be displayed. Looks like this method is called by the Adapter which then sets up the tabs.
+
+Inner class is not extending ListFragment. App stopped unfortunately saying there should be listview in your content with id android.r.id.list
+Added a listview to the layout file with the required id. App works but not sure if lists are showing.
+
+Tried using an ArrayAdapter to populate the list with a temporary string array. Error occured saying ArrayAdapter requires the ID to be a TextView
+Didn't use the right layout list while instantiating the arrayadapter. Need to use one of the predefined/ built-in list items - android.R.layout.simple_list_item_1.
+
+Now it shows the same list on every fragment.
+
+If you use simple_list_item_2, the same error occurs as above. Looks like this is because the listview supports simple text which is in the form of textview.
+
+newPlacesSearchRequest working. Result not displayed in the app; just logged in.
+Log does not show the complete result when indentation is used. Also the result displayed is repeated.
+
+May 3 2016
+Places search results displayed in the Facebook tab and nothing in the other two tabs.
+Currently, it shows nothing in the Facebook tab at first because the result is obtained after some time and the UI is already displayed. If we go back to the tab, expected result appears but this should not be the case.
+Trying to use AsyncTaks to do the requesting in background and then present the result in the respective tab.
+
+new AsyncTask<Param, Progress, Result>
+param: type of parameters sent to the task upon execution - Void
+progress: type of progress units published during the background computation - Integer
+Result: type of the result of the background computation - String[]
+
+May 4 2016
+Added .execute to the AsyncTask. AsyncTask works but still shows empty fragment at start.
+Executes AsyncTask when switching to second tab.
+
+I think a fragment can be displayed at the creation of an activity and the content in the activity, which is a listview in this case, should be loaded after the asynctask is completed, i.e., in the onPostExecute() method.
+
+Making a request in onCreateView() method. Request is made every time the view is created (we go back to the tab).
+Solved this by adding condition to check if the placesResult variable is not assigned yet. Makes a request only if the variable is unassigned.
+
+Making the Graph API request from the AsyncTask is not the best thing. The AsyncTask makes request and then proceeds ahead to completion. It finishes execution as it is not told to wait for the result of Graph API request and therefore executes the onPostExecute method. This is why the list is not as expected in the beginning.
+
+Need to create a new activity in which the page for selected place in the listview will be displayed.
