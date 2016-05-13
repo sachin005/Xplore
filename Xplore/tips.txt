@@ -142,3 +142,25 @@ Solved this by adding condition to check if the placesResult variable is not ass
 Making the Graph API request from the AsyncTask is not the best thing. The AsyncTask makes request and then proceeds ahead to completion. It finishes execution as it is not told to wait for the result of Graph API request and therefore executes the onPostExecute method. This is why the list is not as expected in the beginning.
 
 Need to create a new activity in which the page for selected place in the listview will be displayed.
+
+5 May 2016
+Working on making a GraphRequest to get the facebook URL of a page based on its id which is obtained from the placesSearchRequest.
+This is a simple graphrequest which uses the node "/{page-id}".
+Need to find out how to deal with errors.
+
+8 May 2016
+Careful with the context you use while creating an intent to start another activity.
+http://stackoverflow.com/questions/9227835/use-of-context-to-start-another-activity
+
+9 May 2016
+Facebook page now shown in the WebView activity but need some work to make it look better and get user logged in by default.
+
+11 May 2016
+Do not call UI thread related components from a different thread. You get error saying "Only the original thread that created a view hierarchy can touch its views".
+Refer: http://android-developers.blogspot.com/2009/05/painless-threading.html
+
+GraphRequest call inside doInBackground(). Do UI thread component modification in the onPostExecute()
+
+On back button press from prime activity, it goes back to the list of places. If a different place is selected, prime activity is displayed but it continues from the last time; doesn't update.
+
+Resolved by moving fragment code from onCreateView() to onResume() and adding flags to check if back button was used.
