@@ -27,6 +27,7 @@ import java.util.List;
 
 public class FriendListActivity extends AppCompatActivity {
 
+    private Intent intent;
     private final String TAG = "friendsActivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,49 +37,7 @@ public class FriendListActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         Log.d(TAG, "Started friendListActivity");
 
-//        List<String> friendsList = getFriendsList();
-
-//        if(friendsFromBundle == null) {
-//            friendsFromBundle = {{"Null reply"}};
-//        }
-
-        Intent intent = getIntent();
-//        String[] friendsFromBundle = intent.getStringArrayExtra("friends_list");
-//        Log.d(TAG, "friends from bundle array length: " + friendsFromBundle.length);
-
-        // Todo: find a better way to pass/ receive list to/ from another activity
-        ArrayList<String> friendsList = (ArrayList<String>) intent.getSerializableExtra("fbdata"); // FriendList.getFriendList(); // Arrays.asList(friendsFromBundle);
-        final Location location = intent.getParcelableExtra("location");
-//        String latNLong = intent.getStringExtra("latitude") + " " + intent.getStringExtra("longitude");
-//        if(latNLong.isEmpty()) {
-//            friendsList.add("latNLong is empty");
-//        }
-//        else
-//            friendsList.add(latNLong);
-
-        if(location != null)
-            friendsList.add(location.getLatitude() + "\nlong: " + location.getLongitude());
-        else
-            friendsList.add("location is null");
-        Log.d(TAG, "friendList length: " + friendsList.size());
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, R.layout.friends_listview, friendsList);
-        ListView listView = (ListView) findViewById(R.id.friendslistView);
-
-        if(listView != null) {
-            listView.setAdapter(arrayAdapter);
-
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                    Toast.makeText(getApplicationContext(), "clicked item " + position, Toast.LENGTH_LONG).show();
-                    if(position == 3) {
-                        Intent intent = new Intent(FriendListActivity.this, PrimeActivity.class);
-                        intent.putExtra("location", location);
-                        startActivity(intent);
-                    }
-                }
-            });
-        }
+        intent = getIntent();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -90,6 +49,32 @@ public class FriendListActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Todo: find a better way to pass/ receive list to/ from another activity
+        final ArrayList<String> searchText = (ArrayList<String>) intent.getSerializableExtra("search text");
+        final Location location = intent.getParcelableExtra("location");
+
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, R.layout.friends_listview, searchText);
+        ListView listView = (ListView) findViewById(R.id.friendslistView);
+
+        if(listView != null) {
+            listView.setAdapter(arrayAdapter);
+
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                    Intent intent = new Intent(FriendListActivity.this, PrimeActivity.class);
+                    intent.putExtra("location", location);
+                    intent.putExtra("search text", searchText.get(position));
+                    startActivity(intent);
+                }
+            });
+            Toast.makeText(this, "FriendListActivity resumed", Toast.LENGTH_SHORT).show();
+        }
+    }
 
 
     protected List<String> getFriendsList() {
